@@ -1,5 +1,7 @@
 name: ci
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   test:
@@ -9,11 +11,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
       - name: Lint (syntax)
         run: python -m py_compile cli.py core.py
-      - name: Smoke test (dry-run then apply)
+
+      - name: Prepare examples (no trailing newline in target.txt)
+        shell: bash
         run: |
-          python cli.py examples/patch.md --dry-run
-          python cli.py examples/patch.md --apply
-          grep -q "Hello, WORLD!" examples/target.txt
-          test -f examples/config.ini
+          mkdir -p examples
+          # <- sem newline no fim:
+          printf "Hello, NAME!" > examples/target.txt
+          # patch.md com fences intactas
+          cat > examples/patch.md <<'MD'
